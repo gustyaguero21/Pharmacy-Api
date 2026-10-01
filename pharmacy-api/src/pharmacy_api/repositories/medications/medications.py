@@ -7,7 +7,7 @@ from pharmacy_api.config.queries import (
     FindMedicationByNameQuery,
 )
 
-class MedicationRepository:
+class MedicationsRepository:
     def __init__(self, connection):
         self.connection = connection
 

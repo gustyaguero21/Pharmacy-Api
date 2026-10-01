@@ -8,7 +8,7 @@ from pharmacy_api.config.queries import (
 )
 
 
-class EmployeeRepository:
+class EmployeesRepository:
     def __init__(self, connection):
         self.connection = connection
 
