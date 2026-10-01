@@ -1,5 +1,6 @@
 #queries
 
+#tables
 CreateEmployeeTable="""CREATE TABLE IF NOT EXISTS Employees (
     ID INT PRIMARY KEY AUTO_INCREMENT,
     name VARCHAR(100) NOT NULL,
@@ -11,7 +12,19 @@ CreateEmployeeTable="""CREATE TABLE IF NOT EXISTS Employees (
     password VARCHAR(255) NOT NULL
 )
 """
-CheckExistsQuery="SELECT * FROM Employees WHERE username = %s"
+
+CreateCategoriesTable="""CREATE TABLE IF NOT EXISTS Categories (
+    ID INT PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(100) NOT NULL,
+    code VARCHAR(50) UNIQUE NOT NULL,
+    description VARCHAR(255)
+)
+"""
+
+
+#Employee
+
+CheckExistsEmployeesQuery="SELECT * FROM Employees WHERE username = %s"
 
 GetEmployeesQuery="SELECT * FROM Employees"
 
@@ -22,3 +35,16 @@ UpdateUserQuery="UPDATE Employees SET name = %s, lastname = %s, dni = %s, email 
 DeleteUserQuery="DELETE FROM Employees WHERE username = %s"
 
 ChangePwdQuery="UPDATE Employees SET password = %s WHERE username = %s"
+
+
+#Categories
+
+CheckExistsCategoriesQuery="SELECT * FROM Categories WHERE code = %s"
+
+GetCategoriesQuery="SELECT * FROM Categories"
+
+AddCategoryQuery="INSERT INTO Categories (id, name, code, description) VALUES (DEFAULT, %s, %s, %s)"
+
+UpdateCategoryQuery="UPDATE Categories SET name = %s, code = %s, description = %s WHERE id = %s"
+
+DeleteCategoryQuery="DELETE FROM Categories WHERE id = %s"
