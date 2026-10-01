@@ -1,16 +1,16 @@
 #queries
 
-CreateEmployeeTable="""
-    CREATE TABLE IF NOT EXISTS Employees (
-        ID INT PRIMARY KEY AUTO_INCREMENT,
-        name VARCHAR(100) NOT NULL,
-        lastname VARCHAR(100) NOT NULL,
-        dni VARCHAR(20) NOT NULL,
-        email VARCHAR(100) NOT NULL,
-        position VARCHAR(100) NOT NULL
-    )
+CreateEmployeeTable="""CREATE TABLE IF NOT EXISTS Employees (
+    ID INT PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(100) NOT NULL,
+    lastname VARCHAR(100) NOT NULL,
+    dni VARCHAR(20) NOT NULL,
+    email VARCHAR(100) NOT NULL,
+    position VARCHAR(100) NOT NULL,
+    username VARCHAR(50) UNIQUE NOT NULL,
+    password VARCHAR(255) NOT NULL
+)
 """
-
 CheckExistsQuery="SELECT * FROM Employees WHERE username = %s"
 
 GetEmployeesQuery="SELECT * FROM Employees"

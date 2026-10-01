@@ -34,7 +34,7 @@ def DBConnection():
 
         return connection
 
-    except Exception as error:
+    except pymysql.MySQLError as error:
         print(f"Error handling database connection: {error}")
         if connection:
             connection.close()
