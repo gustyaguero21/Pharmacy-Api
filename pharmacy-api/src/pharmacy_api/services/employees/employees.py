@@ -2,9 +2,6 @@ class EmployeeService:
     def __init__(self, repository):
         self.repository = repository
 
-    def check_exists(self, username):
-        return self.repository.check_exists(username)
-
     def list_employees(self):
         return self.repository.ListEmployees()
 

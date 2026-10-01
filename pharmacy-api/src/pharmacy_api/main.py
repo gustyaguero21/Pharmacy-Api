@@ -8,7 +8,9 @@ from pharmacy_api.repositories.medications.medications import MedicationsReposit
 from pharmacy_api.services.employees.employees import EmployeeService
 from pharmacy_api.services.categories.categories import CategoriesServices
 from pharmacy_api.services.medications.medications import MedicationsService
-
+from pharmacy_api.controllers.employees.employees import EmployeeController
+from pharmacy_api.controllers.categories.categories import CategoriesController
+from pharmacy_api.controllers.medications.medications import MedicationsController
 
 
 def main():
@@ -24,8 +26,10 @@ def main():
     employee_service = EmployeeService(repository=employee_repository)
     categories_service = CategoriesServices(repository=categories_repository)
     medications_service = MedicationsService(repository=medications_repository)
-
-
+    #inicializa los controladores para interactuar con los servicios.
+    employee_controller = EmployeeController(service=employee_service)
+    categories_controller = CategoriesController(service=categories_service)
+    medications_controller = MedicationsController(service=medications_service)
 
 
 if __name__ == "__main__":

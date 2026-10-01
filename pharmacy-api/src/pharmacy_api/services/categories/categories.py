@@ -2,9 +2,6 @@ class CategoriesServices:
     def __init__(self, categories_repository):
         self.categories_repository = categories_repository
 
-    def check_exists(self, code):
-        return self.categories_repository.check_exists(code)
-
     def list_categories(self):
         return self.categories_repository.ListCategories()
 
