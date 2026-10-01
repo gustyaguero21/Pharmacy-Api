@@ -1,9 +1,11 @@
 from pharmacy_api.config.queries import CreateCategoriesTable
 from pharmacy_api.config.queries import CreateEmployeeTable
+from pharmacy_api.config.queries import CreateMedicationsTable
 
 migrations = [
     (CreateCategoriesTable, "CreateCategoriesTable"),
-    (CreateEmployeeTable, "CreateEmployeeTable")
+    (CreateEmployeeTable, "CreateEmployeeTable"),
+    (CreateMedicationsTable, "CreateMedicationsTable"),
 ]
 
 def Migrate(connection):

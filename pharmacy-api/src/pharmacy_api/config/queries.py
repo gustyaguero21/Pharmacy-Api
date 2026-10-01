@@ -21,6 +21,14 @@ CreateCategoriesTable="""CREATE TABLE IF NOT EXISTS Categories (
 )
 """
 
+CreateMedicationsTable="""CREATE TABLE IF NOT EXISTS Medications (
+    ID INT PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(100) NOT NULL,
+    code VARCHAR(50) UNIQUE NOT NULL,
+    description VARCHAR(255)
+)
+"""
+
 
 #Employee
 
@@ -48,3 +56,17 @@ AddCategoryQuery="INSERT INTO Categories (id, name, code, description) VALUES (D
 UpdateCategoryQuery="UPDATE Categories SET name = %s, code = %s, description = %s WHERE id = %s"
 
 DeleteCategoryQuery="DELETE FROM Categories WHERE id = %s"
+
+#Medications
+
+CheckExistsMedicationsQuery="SELECT * FROM Medications WHERE name = %s"
+
+GetAllMedicationsQuery="SELECT * FROM Medications"
+
+AddMedicationQuery="INSERT INTO Medications (id, name, price, stock, category, expiration_date) VALUES (DEFAULT, %s, %s, %s, %s, %s)"
+
+UpdateMedicationQuery="UPDATE Medications SET name = %s, price = %s, stock = %s, category = %s, expiration_date = %s WHERE id = %s"
+
+DeleteMedicationQuery="DELETE FROM Medications WHERE id = %s"
+
+FindMedicationByNameQuery="SELECT * FROM Medications WHERE name = %s"
