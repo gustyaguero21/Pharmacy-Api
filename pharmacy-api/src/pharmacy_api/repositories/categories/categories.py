@@ -1,10 +1,10 @@
 from pharmacy_api.config.queries import (
-    AddCategoryQuery,
     CheckExistsCategoriesQuery,
-    DeleteCategoryQuery,
     GetCategoriesQuery,
-    GetCategoryByCodeQuery,  # Se recomienda tener una consulta específica para traer el registro
+    AddCategoryQuery,
     UpdateCategoryQuery,
+    DeleteCategoryQuery,
+    GetCategoryByCodeQuery
 )
 
 
@@ -13,9 +13,15 @@ class CategoriesRepository:
         self.connection = connection
 
     def check_exists(self, code: str) -> bool:
-        with self.connection.cursor() as cursor:
-            cursor.execute(CheckExistsCategoriesQuery, (code,))
-            return cursor.fetchone() is not None
+        cursor = self.connection.cursor()
+        try:
+            # Normalizamos a mayúsculas y quitamos espacios
+            clean_code = str(code).strip().upper()
+            cursor.execute(CheckExistsCategoriesQuery, (clean_code,))
+            result = cursor.fetchone()
+            return result is not None
+        finally:
+            cursor.close()
 
     def list_categories(self):
         with self.connection.cursor() as cursor:
@@ -26,25 +32,40 @@ class CategoriesRepository:
         if self.check_exists(category["code"]):
             return False
 
-        with self.connection.cursor() as cursor:
+        cursor = self.connection.cursor()
+        try:
             cursor.execute(
                 AddCategoryQuery,
-                (category["name"], category["code"], category.get("description", "")),
+                (
+                    category["code"],  # 1º Posición: code (Primary Key)
+                    category["name"],  # 2º Posición: name
+                    category.get("description", ""),  # 3º Posición: description
+                ),
             )
-        self.connection.commit()
-        return True
+            self.connection.commit()
+            return True
+        finally:
+            cursor.close()
 
     def edit_category(self, category: dict) -> bool:
         if not self.check_exists(category["code"]):
             return False
 
-        with self.connection.cursor() as cursor:
+        cursor = self.connection.cursor()
+        try:
             cursor.execute(
                 UpdateCategoryQuery,
-                (category["name"], category.get("description", ""), category["code"]),
+                (
+                    category["name"],
+                    category.get("description", ""),
+                    category["code"],
+                ),
             )
-        self.connection.commit()
-        return True
+            self.connection.commit()
+            # Retorna True si modificó al menos una fila
+            return cursor.rowcount > 0
+        finally:
+            cursor.close()
 
     def delete_category(self, code: str) -> bool:
         if not self.check_exists(code):
@@ -56,6 +77,15 @@ class CategoriesRepository:
         return True
 
     def find_category_by_code(self, code: str):
-        with self.connection.cursor() as cursor:
+            cursor = self.connection.cursor()
             cursor.execute(GetCategoryByCodeQuery, (code,))
-            return cursor.fetchone()
+            row = cursor.fetchone()
+
+            if not row:
+                cursor.close()
+                return None
+            columns = [column[0] for column in cursor.description]
+            category = dict(zip(columns, row))
+
+            cursor.close()
+            return category

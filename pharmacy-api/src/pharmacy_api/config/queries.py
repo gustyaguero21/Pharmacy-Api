@@ -1,8 +1,11 @@
 #queries
 
 #tables
+from pharmacy_api.router.routes import create_medications_blueprint
+
+
 CreateEmployeeTable="""CREATE TABLE IF NOT EXISTS Employees (
-    ID INT PRIMARY KEY AUTO_INCREMENT,
+    id INT PRIMARY KEY AUTO_INCREMENT,
     name VARCHAR(100) NOT NULL,
     lastname VARCHAR(100) NOT NULL,
     dni VARCHAR(20) NOT NULL,
@@ -13,22 +16,26 @@ CreateEmployeeTable="""CREATE TABLE IF NOT EXISTS Employees (
 )
 """
 
-CreateCategoriesTable="""CREATE TABLE IF NOT EXISTS Categories (
-    ID INT PRIMARY KEY AUTO_INCREMENT,
+
+CreateCategoriesTable = """
+CREATE TABLE IF NOT EXISTS Categories (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    code VARCHAR(50) NOT NULL,
     name VARCHAR(100) NOT NULL,
-    code VARCHAR(50) UNIQUE NOT NULL,
-    description VARCHAR(255)
-)
+    description TEXT
+);
 """
 
-CreateMedicationsTable="""CREATE TABLE IF NOT EXISTS Medications (
-    ID INT PRIMARY KEY AUTO_INCREMENT,
+CreateMedicationsTable = """
+CREATE TABLE IF NOT EXISTS Medications (
+    id INT PRIMARY KEY AUTO_INCREMENT,
     name VARCHAR(100) NOT NULL,
-    code VARCHAR(50) UNIQUE NOT NULL,
-    description VARCHAR(255)
-)
+    price DECIMAL(10, 2) NOT NULL,
+    stock INT NOT NULL,
+    category VARCHAR(50) NOT NULL,
+    expiration_date DATE NOT NULL
+);
 """
-
 
 #Employee
 
@@ -47,15 +54,18 @@ ChangePwdQuery="UPDATE Employees SET password = %s WHERE username = %s"
 
 #Categories
 
-CheckExistsCategoriesQuery="SELECT * FROM Categories WHERE code = %s"
 
-GetCategoriesQuery="SELECT * FROM Categories"
+CheckExistsCategoriesQuery = "SELECT 1 FROM Categories WHERE code = %s LIMIT 1;"
 
-AddCategoryQuery="INSERT INTO Categories (id, name, code, description) VALUES (DEFAULT, %s, %s, %s)"
+GetCategoriesQuery = "SELECT * FROM Categories;"
 
-UpdateCategoryQuery="UPDATE Categories SET name = %s, code = %s, description = %s WHERE id = %s"
+GetCategoryByCodeQuery = "SELECT * FROM Categories WHERE code = %s;"
 
-DeleteCategoryQuery="DELETE FROM Categories WHERE id = %s"
+AddCategoryQuery = "INSERT INTO Categories (code, name, description) VALUES (%s, %s, %s);"
+
+UpdateCategoryQuery = "UPDATE Categories SET name = %s, description = %s WHERE code = %s;"
+
+DeleteCategoryQuery = "DELETE FROM Categories WHERE code = %s;"
 
 #Medications
 
@@ -65,8 +75,8 @@ GetAllMedicationsQuery="SELECT * FROM Medications"
 
 AddMedicationQuery="INSERT INTO Medications (id, name, price, stock, category, expiration_date) VALUES (DEFAULT, %s, %s, %s, %s, %s)"
 
-UpdateMedicationQuery="UPDATE Medications SET name = %s, price = %s, stock = %s, category = %s, expiration_date = %s WHERE id = %s"
+UpdateMedicationQuery="UPDATE Medications SET name = %s, price = %s, stock = %s, category = %s, expiration_date = %s WHERE name = %s"
 
-DeleteMedicationQuery="DELETE FROM Medications WHERE id = %s"
+DeleteMedicationQuery="DELETE FROM Medications WHERE name = %s"
 
 FindMedicationByNameQuery="SELECT * FROM Medications WHERE name = %s"
