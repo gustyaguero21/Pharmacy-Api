@@ -1,49 +1,57 @@
+import re
+import bcrypt
+
+EMAIL_REGEX = r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
+
 class EmployeeService:
-    def __init__(self, repository):
-        self.repository = repository
+    def __init__(self, employee_repository):
+        self.employee_repository = employee_repository
 
     def list_employees(self):
-        return self.repository.ListEmployees()
+        return self.employee_repository.list_employees()
 
-    def create_user(self, user):
+    def create_user(self, user: dict):
         self.validate_user_data(user)
-        encrypted_password = self.encrypt_password(user['password'])
-        user['password'] = encrypted_password
-        return self.repository.NewUser(user)
+        if not user.get("password"):
+            raise ValueError("Contraseña obligatoria.")
 
-    def update_user(self, user):
+        user["password"] = self.hash_password(user["password"])
+        return self.employee_repository.new_user(user)
+
+    def update_user(self, user: dict):
         self.validate_user_data(user)
-        encrypted_password = self.encrypt_password(user['password'])
-        user['password'] = encrypted_password
-        return self.repository.EditUser(user)
+        return self.employee_repository.edit_user(user)
 
-    def delete_user(self, username):
-        return self.repository.DeleteUser(username)
+    def delete_user(self, username: str):
+        return self.employee_repository.delete_user(username)
 
-    def change_password(self, username, new_password):
-        encrypted_password = self.encrypt_password(new_password)
-        return self.repository.ChangePassword(username, encrypted_password)
+    def change_password(self, username: str, new_password: str):
+        if not new_password:
+            raise ValueError("La nueva contraseña no puede estar vacía.")
 
-    def find_employee_by_username(self, username):
-        return self.repository.FindEmployeeByUsername(username)
+        hashed_password = self.hash_password(new_password)
+        return self.employee_repository.change_password(username, hashed_password)
 
-    def validate_user_data(self, user):
-        if not user.get('name'):
+    def find_employee_by_username(self, username: str):
+        return self.employee_repository.find_employee_by_username(username)
+
+    def validate_user_data(self, user: dict):
+        if not user.get("name"):
             raise ValueError("Nombre obligatorio.")
-        if not user.get('last_name'):
+        if not user.get("last_name"):
             raise ValueError("Apellido obligatorio.")
-        if not user.get('dni'):
+        if not user.get("dni"):
             raise ValueError("DNI obligatorio.")
-        if not self.is_valid_email(user.get('email')):
-            raise ValueError("Email válido.")
-        if not user.get('position'):
+        if not self.is_valid_email(user.get("email", "")):
+            raise ValueError("Email no válido.")
+        if not user.get("position"):
             raise ValueError("Cargo obligatorio.")
+        if not user.get("username"):
+            raise ValueError("Nombre de usuario obligatorio.")
 
-    def is_valid_email(self, email):
-        import re
-        email_regex = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
-        return re.match(email_regex, email) is not None
+    def is_valid_email(self, email: str) -> bool:
+        return re.match(EMAIL_REGEX, email) is not None
 
-    def encrypt_password(self, password):
-        import hashlib
-        return hashlib.sha256(password.encode()).hexdigest()
+    def hash_password(self, password: str) -> str:
+        salt = bcrypt.gensalt()
+        return bcrypt.hashpw(password.encode("utf-8"), salt).decode("utf-8")

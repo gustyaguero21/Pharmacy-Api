@@ -12,55 +12,74 @@ class EmployeesRepository:
     def __init__(self, connection):
         self.connection = connection
 
-    def check_exists(self, username):
-        cursor = self.connection.cursor()
-        cursor.execute(CheckExistsEmployeesQuery, (username,))
-        return cursor.fetchone() is not None
+    def check_exists(self, username: str) -> bool:
+        with self.connection.cursor() as cursor:
+            cursor.execute(CheckExistsEmployeesQuery, (username,))
+            return cursor.fetchone() is not None
 
-    def ListEmployees(self):
-        cursor = self.connection.cursor()
-        cursor.execute(GetEmployeesQuery)
-        return cursor.fetchall()
+    def list_employees(self):
+        with self.connection.cursor() as cursor:
+            cursor.execute(GetEmployeesQuery)
+            return cursor.fetchall()
 
-    def NewUser(self, user):
-        if self.check_exists(user.username):
+    def new_user(self, user: dict) -> bool:
+        if self.check_exists(user["username"]):
             return False
-        cursor = self.connection.cursor()
-        cursor.execute(
-            AddUserQuery,
-            (user.name, user.lastname, user.dni, user.email, user.position, user.username, user.password),
-        )
+
+        with self.connection.cursor() as cursor:
+            cursor.execute(
+                AddUserQuery,
+                (
+                    user["name"],
+                    user["last_name"],
+                    user["dni"],
+                    user["email"],
+                    user["position"],
+                    user["username"],
+                    user["password"],
+                ),
+            )
         self.connection.commit()
         return True
 
-    def EditUser(self, user):
-        if not self.check_exists(user.username):
+    def edit_user(self, user: dict) -> bool:
+        if not self.check_exists(user["username"]):
             return False
-        cursor = self.connection.cursor()
-        cursor.execute(
-            UpdateUserQuery,
-            (user.name, user.lastname, user.dni, user.email, user.position, user.username),
-        )
+
+        with self.connection.cursor() as cursor:
+            cursor.execute(
+                UpdateUserQuery,
+                (
+                    user["name"],
+                    user["last_name"],
+                    user["dni"],
+                    user["email"],
+                    user["position"],
+                    user["username"],
+                ),
+            )
         self.connection.commit()
         return True
 
-    def DeleteUser(self, username):
+    def delete_user(self, username: str) -> bool:
         if not self.check_exists(username):
             return False
-        cursor = self.connection.cursor()
-        cursor.execute(DeleteUserQuery, (username,))
+
+        with self.connection.cursor() as cursor:
+            cursor.execute(DeleteUserQuery, (username,))
         self.connection.commit()
         return True
 
-    def ChangePassword(self, username, new_password):
+    def change_password(self, username: str, new_password_hash: str) -> bool:
         if not self.check_exists(username):
             return False
-        cursor = self.connection.cursor()
-        cursor.execute(ChangePwdQuery, (new_password, username))
+
+        with self.connection.cursor() as cursor:
+            cursor.execute(ChangePwdQuery, (new_password_hash, username))
         self.connection.commit()
         return True
 
-    def FindEmployeeByUsername(self, username):
-        cursor = self.connection.cursor()
-        cursor.execute(CheckExistsEmployeesQuery, (username,))
-        return cursor.fetchone()
+    def find_employee_by_username(self, username: str):
+        with self.connection.cursor() as cursor:
+            cursor.execute(CheckExistsEmployeesQuery, (username,))
+            return cursor.fetchone()

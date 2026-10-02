@@ -2,8 +2,9 @@ from pharmacy_api.config.queries import (
     AddCategoryQuery,
     CheckExistsCategoriesQuery,
     DeleteCategoryQuery,
-    UpdateCategoryQuery,
     GetCategoriesQuery,
+    GetCategoryByCodeQuery,  # Se recomienda tener una consulta específica para traer el registro
+    UpdateCategoryQuery,
 )
 
 
@@ -11,47 +12,50 @@ class CategoriesRepository:
     def __init__(self, connection):
         self.connection = connection
 
-    def check_exists(self, code):
-        cursor = self.connection.cursor()
-        cursor.execute(CheckExistsCategoriesQuery, (code,))
-        return cursor.fetchone() is not None
+    def check_exists(self, code: str) -> bool:
+        with self.connection.cursor() as cursor:
+            cursor.execute(CheckExistsCategoriesQuery, (code,))
+            return cursor.fetchone() is not None
 
-    def ListCategories(self):
-        cursor = self.connection.cursor()
-        cursor.execute(GetCategoriesQuery)
-        return cursor.fetchall()
+    def list_categories(self):
+        with self.connection.cursor() as cursor:
+            cursor.execute(GetCategoriesQuery)
+            return cursor.fetchall()
 
-    def NewCategory(self, category):
-        if self.check_exists(category.code):
+    def new_category(self, category: dict) -> bool:
+        if self.check_exists(category["code"]):
             return False
-        cursor = self.connection.cursor()
-        cursor.execute(
-            AddCategoryQuery,
-            (category.name, category.code, category.description),
-        )
+
+        with self.connection.cursor() as cursor:
+            cursor.execute(
+                AddCategoryQuery,
+                (category["name"], category["code"], category.get("description", "")),
+            )
         self.connection.commit()
         return True
 
-    def EditCategory(self, category):
-        if not self.check_exists(category.code):
+    def edit_category(self, category: dict) -> bool:
+        if not self.check_exists(category["code"]):
             return False
-        cursor = self.connection.cursor()
-        cursor.execute(
-            UpdateCategoryQuery,
-            (category.name, category.description, category.code),
-        )
+
+        with self.connection.cursor() as cursor:
+            cursor.execute(
+                UpdateCategoryQuery,
+                (category["name"], category.get("description", ""), category["code"]),
+            )
         self.connection.commit()
         return True
 
-    def DeleteCategory(self, code):
+    def delete_category(self, code: str) -> bool:
         if not self.check_exists(code):
             return False
-        cursor = self.connection.cursor()
-        cursor.execute(DeleteCategoryQuery, (code,))
+
+        with self.connection.cursor() as cursor:
+            cursor.execute(DeleteCategoryQuery, (code,))
         self.connection.commit()
         return True
 
-    def FindCategoryByCode(self, code):
-        cursor = self.connection.cursor()
-        cursor.execute(CheckExistsCategoriesQuery, (code,))
-        return cursor.fetchone()
+    def find_category_by_code(self, code: str):
+        with self.connection.cursor() as cursor:
+            cursor.execute(GetCategoryByCodeQuery, (code,))
+            return cursor.fetchone()
