@@ -1,4 +1,4 @@
-class CategoryService:
+class CategoriesService:
     def __init__(self, categories_repository):
         self.categories_repository = categories_repository
 
