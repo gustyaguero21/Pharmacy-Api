@@ -15,26 +15,33 @@ from pharmacy_api.controllers.medications.medications import MedicationsControll
 
 
 def main():
-    #levanta la base de datos mysql.
+    # Levanta la base de datos mysql y corre migraciones iniciales
     connection = database.DBConnection()
-    #crea las tablas en una migracion controlada mediante la funcion Migrate.
     Migrate(connection=connection)
-    #inicializa los repositorios para interactuar con la base de datos.
+
+    # Inicializa los repositorios
+    # NOTA: Para evitar el error (0, '') asegúrate que tus repositorios
+    # abran/cierren una conexión o usen un pool por cada consulta HTTP.
     employee_repository = EmployeesRepository(connection=connection)
     categories_repository = CategoriesRepository(connection=connection)
     medications_repository = MedicationsRepository(connection=connection)
-    #inicializa los servicios para interactuar con los repositorios.
+
+    # Inicializa los servicios
     employee_service = EmployeeService(employee_repository=employee_repository)
     categories_service = CategoriesService(categories_repository=categories_repository)
     medications_service = MedicationsService(medications_repository=medications_repository)
-    #inicializa los controladores para interactuar con los servicios.
+
+    # Inicializa los controladores
     employee_controller = EmployeeController(employee_service=employee_service)
     categories_controller = CategoriesController(categories_service=categories_service)
     medications_controller = MedicationsController(medications_service=medications_service)
-    #crea la aplicacion Flask con los controladores.
+
+    # Crea la aplicación Flask
     app = create_app(employee_controller, categories_controller, medications_controller)
-    #inicia el servidor Flask.
-    app.run()
+
+    return app
+
 
 if __name__ == "__main__":
-    main()
+    app = main()
+    app.run(debug=True, port=5000)
