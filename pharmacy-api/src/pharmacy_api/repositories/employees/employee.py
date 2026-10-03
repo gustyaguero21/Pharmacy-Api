@@ -1,3 +1,5 @@
+import config.env
+
 from pharmacy_api.config.queries import (
     AddUserQuery,
     ChangePwdQuery,
@@ -12,13 +14,21 @@ class EmployeesRepository:
     def __init__(self, connection):
         self.connection = connection
 
+    def _get_cursor(self):
+        self.connection.ping(reconnect=True)
+
+        db_name = config.env.get_db_name()
+        self.connection.select_db(db_name)
+
+        return self.connection.cursor()
+
     def check_exists(self, username: str) -> bool:
-        with self.connection.cursor() as cursor:
+        with self._get_cursor() as cursor:
             cursor.execute(CheckExistsEmployeesQuery, (username,))
             return cursor.fetchone() is not None
 
     def list_employees(self):
-        with self.connection.cursor() as cursor:
+        with self._get_cursor() as cursor:
             cursor.execute(GetEmployeesQuery)
             return cursor.fetchall()
 
@@ -26,7 +36,7 @@ class EmployeesRepository:
         if self.check_exists(user["username"]):
             return False
 
-        with self.connection.cursor() as cursor:
+        with self._get_cursor() as cursor:
             cursor.execute(
                 AddUserQuery,
                 (
@@ -39,6 +49,7 @@ class EmployeesRepository:
                     user["password"],
                 ),
             )
+
         self.connection.commit()
         return True
 
@@ -46,7 +57,7 @@ class EmployeesRepository:
         if not self.check_exists(user["username"]):
             return False
 
-        with self.connection.cursor() as cursor:
+        with self._get_cursor() as cursor:
             cursor.execute(
                 UpdateUserQuery,
                 (
@@ -58,6 +69,7 @@ class EmployeesRepository:
                     user["username"],
                 ),
             )
+
         self.connection.commit()
         return True
 
@@ -65,8 +77,9 @@ class EmployeesRepository:
         if not self.check_exists(username):
             return False
 
-        with self.connection.cursor() as cursor:
+        with self._get_cursor() as cursor:
             cursor.execute(DeleteUserQuery, (username,))
+
         self.connection.commit()
         return True
 
@@ -74,12 +87,19 @@ class EmployeesRepository:
         if not self.check_exists(username):
             return False
 
-        with self.connection.cursor() as cursor:
-            cursor.execute(ChangePwdQuery, (new_password_hash, username))
+        with self._get_cursor() as cursor:
+            cursor.execute(
+                ChangePwdQuery,
+                (new_password_hash, username),
+            )
+
         self.connection.commit()
         return True
 
     def find_employee_by_username(self, username: str):
-        with self.connection.cursor() as cursor:
-            cursor.execute(CheckExistsEmployeesQuery, (username,))
+        with self._get_cursor() as cursor:
+            cursor.execute(
+                CheckExistsEmployeesQuery,
+                (username,),
+            )
             return cursor.fetchone()
