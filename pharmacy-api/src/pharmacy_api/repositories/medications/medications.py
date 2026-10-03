@@ -1,3 +1,5 @@
+import config.env
+
 from pharmacy_api.config.queries import (
     AddMedicationQuery,
     CheckExistsMedicationsQuery,
@@ -12,8 +14,16 @@ class MedicationsRepository:
     def __init__(self, connection):
         self.connection = connection
 
+    def _get_cursor(self):
+        self.connection.ping(reconnect=True)
+
+        db_name = config.env.get_db_name()
+        self.connection.select_db(db_name)
+
+        return self.connection.cursor()
+
     def check_exists(self, name: str) -> bool:
-        with self.connection.cursor() as cursor:
+        with self._get_cursor() as cursor:
             cursor.execute(CheckExistsMedicationsQuery, (name,))
             return cursor.fetchone() is not None
 
@@ -21,7 +31,7 @@ class MedicationsRepository:
         if self.check_exists(medication["name"]):
             return False
 
-        with self.connection.cursor() as cursor:
+        with self._get_cursor() as cursor:
             cursor.execute(
                 AddMedicationQuery,
                 (
@@ -32,6 +42,7 @@ class MedicationsRepository:
                     medication["expiration_date"],
                 ),
             )
+
         self.connection.commit()
         return True
 
@@ -39,7 +50,7 @@ class MedicationsRepository:
         if not self.check_exists(medication["name"]):
             return False
 
-        with self.connection.cursor() as cursor:
+        with self._get_cursor() as cursor:
             cursor.execute(
                 UpdateMedicationQuery,
                 (
@@ -51,6 +62,7 @@ class MedicationsRepository:
                     medication["name"],
                 ),
             )
+
         self.connection.commit()
         return True
 
@@ -58,17 +70,18 @@ class MedicationsRepository:
         if not self.check_exists(name):
             return False
 
-        with self.connection.cursor() as cursor:
+        with self._get_cursor() as cursor:
             cursor.execute(DeleteMedicationQuery, (name,))
+
         self.connection.commit()
         return True
 
     def get_all_medications(self):
-        with self.connection.cursor() as cursor:
+        with self._get_cursor() as cursor:
             cursor.execute(GetAllMedicationsQuery)
             return cursor.fetchall()
 
     def find_medication_by_name(self, name: str):
-        with self.connection.cursor() as cursor:
+        with self._get_cursor() as cursor:
             cursor.execute(FindMedicationByNameQuery, (name,))
             return cursor.fetchone()
