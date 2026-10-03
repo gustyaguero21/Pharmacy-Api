@@ -20,6 +20,7 @@ def DBConnection():
             port=db_port,
             user=db_user,
             password=db_password,
+            autocommit=True,
         )
 
         print("Connected to MySQL successfully.")

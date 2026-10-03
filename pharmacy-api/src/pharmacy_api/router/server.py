@@ -1,4 +1,5 @@
 from flask import Flask
+from flask_cors import CORS
 
 from pharmacy_api.router.routes import (
     create_categories_blueprint,
@@ -12,6 +13,7 @@ def create_app(employee_controller, categories_controller, medications_controlle
     Crea y configura la aplicación Flask inyectando los controladores.
     """
     app = Flask(__name__)
+    CORS(app)
 
     # Registra los Blueprints pasándole a cada fábrica su controlador correspondiente
     app.register_blueprint(
